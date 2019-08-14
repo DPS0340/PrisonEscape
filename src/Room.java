@@ -1,156 +1,179 @@
-//Class needed to make room objects which will occupy the world objects
-import java.util.ArrayList;
-public class Room {
-    private ArrayList<Charachter> charachter_list;
-    private ArrayList<String> action_list;
-    private Position pos;
-    private String des;
-    private String actionbar;
-    private Weapon item;
-    public Room(Position pos){
-        //Constructor
-        this.charachter_list=new ArrayList<Charachter>();
-        this.action_list=new ArrayList<String>();
-        this.pos=pos;
-        this.des="";
-        this.actionbar="AVAILABLE ACTION:"+"\n";
-    }
-    public void addAction(String s){
-        //Method which adds "Actions" to room objects.
-        String string=s.toLowerCase();
-        switch (string){
-            case "up":
-                action_list.add(string);
-                actionbar=actionbar+"TYPE UP TO MOVE UP"+"\n";
-                break;
-            case "down":
-                action_list.add(string);
-                actionbar=actionbar+"TYPE DOWN TO MOVE DOWN"+"\n";
-                break;
-            case "left":
-                action_list.add(string);
-                actionbar=actionbar+"TYPE LEFT TO MOVE LEFT"+"\n";
-                break;
-            case "right":
-                action_list.add(string);
-                actionbar=actionbar+"TYPE RIGHT TO MOVE RIGHT"+"\n";
-                break;
-            case "attack":
-                action_list.add(string);
-                actionbar=actionbar+"TYPE ATTACK TO ATTACK"+"\n";
-                break;
-            case "pick":
-                action_list.add(string);
-                actionbar=actionbar+"TYPE PICK TO PICK UP WEAPON"+"\n";
-                break;
-            case "heal":
-                action_list.add(string);
-                actionbar=actionbar+"TYPE HEAL TO USE MEDKIT"+"\n";
-                break;
-            default:
-                System.out.println("Unrecognized action");
-        }
-    }
-    public void removeAction(String s){
-        //Method which removes "Actions" from room objects.
-        String string=s.toLowerCase();
-        switch (string){
-            case "up":
-                action_list.remove(string);
-                actionbar=actionbar.replace("TYPE UP TO MOVE UP"+"\n","");
-                break;
-            case "down":
-                action_list.remove(string);
-                actionbar=actionbar.replace("TYPE DOWN TO MOVE DOWN"+"\n","");
-                break;
-            case "left":
-                action_list.remove(string);
-                actionbar=actionbar.replace("TYPE LEFT TO MOVE LEFT"+"\n","");
-                break;
-            case "right":
-                action_list.remove(string);
-                actionbar=actionbar.replace("TYPE RIGHT TO MOVE RIGHT"+"\n","");
-                break;
-            case "attack":
-                action_list.remove(string);
-                actionbar=actionbar.replace("TYPE ATTACK TO ATTACK"+"\n","");
-                break;
-            case "pick":
-                action_list.remove(string);
-                actionbar=actionbar.replace("TYPE PICK TO PICK UP WEAPON"+"\n","");
-                break;
-            case "heal":
-                action_list.remove(string);
-                actionbar=actionbar.replace("TYPE HEAL TO USE MEDKIT"+"\n","");
-            default:
-                System.out.println("Unrecognized action");
-        }
+import java.util.HashMap;
+import java.util.Objects;
 
+public class Room {
+    /* Class that represents rooms in the game, Room objects are to be stored and used by world object.
+       Room objects also might contain Position, ActionString, Enemy, and/or Item objects. */
+
+    private Enemy enemy; //Enemy Object which may be present in the room.
+    private final HashMap<String, ActionString> actionStrings = new HashMap<>(); //HashMap that contains String/ActionString pairs
+    private final Position position; //Position Object representing the cartesian co-ordinate of the room.
+    private String description; //Description of the room needed for output in the game.
+    private Item item; //Weapon Object that a room might possess.
+
+    public Room(Position position){
+        this.position = position;
+        this.setDescription();
     }
-    public boolean validAction(String s){
-        //Method which returns true if an "Action" is in the action_list arraylist,method returns false otherwise.
-        for(String a:action_list){
-            if(s.equals(a)){return true;}
-        }
-        return false;
+    //Getter Functions/ Accessor Methods.
+    public Enemy getEnemy(){
+        //Use with containsEnemy method to avoid NullPointerException.
+        return this.enemy;
     }
-    public boolean emptyRoom(){
-        //Method which returns true if there is no character in the room object,false otherwise.
-        if(charachter_list.isEmpty()){return true;}
-        return false;
+    public HashMap<String, ActionString> getActionStrings(){
+        return this.actionStrings;
     }
-    public void removeCharachter(){
-        //Method which removes a character from the room object.Does nothing if no character is present in the room object.
-     if(!charachter_list.isEmpty()){
-         charachter_list.remove(0);
-         removeAction("attack");
-     }
-     else{
-         System.out.println("No one is in the room");
-     }
+    public Position getPosition(){
+        return this.position;
     }
-    public void addCharachter(Charachter c){
-        //Method which adds a Character object to the room object.
-        if(charachter_list.isEmpty()){
-            charachter_list.add(c);
+    public String getDescription(){
+        return this.description;
+    }
+    public Item getItem(){
+        //Use with containsItem method to avoid NullPointerException.
+        return this.item;
+    }
+
+    //Setter Functions/ Mutator Methods.
+    public void setEnemy(Enemy enemy){
+        this.enemy = enemy;
+        this.setDescription();
+    }
+    public void setDescription(String description){
+        this.description = description;
+    }
+    public void setDescription(){
+        if(this.containsEnemy()){
+            this.setDescription(this.enemy.getDescription());
         }
         else{
-            System.out.println("Room Occupied");
+            if(this.containsItem()){
+                if(!(this.getItem() instanceof Knuckels)) {
+                    this.setDescription(this.item.getDescription());
+                }
+            }
+            else{
+                this.setDescription("You have entered an empty room");
+            }
         }
     }
-    public Charachter getCharachter(){
-        //Method which returns the character present in the room object,use with caution as Error will be raised if no character is present in the room object.
-        return charachter_list.get(0);
+    public void setItem(Item item){
+        this.item = item;
+        this.setDescription();
     }
-    public Position getPos(){
-        //Returns the position object associated with the room object i.e the position which the room object occupies.
-        return this.pos;
+
+    public boolean containsEnemy(){
+        //Method that returns true, if the room contains an Enemy Object, false otherwise.
+        if(this.enemy == null){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
-    public void setPos(Position pos){
-        //Method which sets the position of the room object.
-        this.pos=pos;
+    public boolean containsItem(){
+        //Method that returns true, if the room contains an Item Object, false otherwise.
+        if(this.item == null){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
-    public String getDes(){
-        //Returns the description of the room.Descriptions are key part of the game as it makes each room unique and helps us create the narrative which fuels the game.
-        return this.des;}
-    public String getActionbar(){
-        //Returns the action-bar of the room.The Action Bar is a key part of the UI as it shows the actions available to the user and the actions in the action_list of the room object.
-        return this.actionbar;}
-    public void setDes(String s){
-        //Sets the description of the room object.
-        this.des=s;
+    public boolean containsAction(String string){
+        //Method that returns true, if an entry in actionStrings map contains a key matching the argument provided.
+        //Method returns false otherwise.
+        if(actionStrings.containsKey(string)){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
-    public String getSetup(){
-        //Returns the "setup" of the room which is a string object containing the description and action-bar of the room,separated by two newlines.
-        String result=this.des+"\n"+"\n"+this.actionbar;
-        return result;
+    public boolean containsAction(ActionString actionString){
+        //Method that returns true, if an entry in the actionStrings map contains a value matching the argument provided.
+        //Method returns false otherwise.
+        if(actionStrings.containsValue(actionString)){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
-    public void setItem(Weapon w){
-        //Sets the item(weapon) in the room object.
-        this.item=w;
+
+    public void addAction(String string, ActionString actionString){
+        //Method which puts a String/ActionString pairing into the actionStrings HashMap.
+        this.actionStrings.put(string,actionString);
+
     }
-    public Weapon getItem(){
-        //Returns the item(weapon) object in the room.Use with caution as it raises error if item object of the room has not been set.
-        return this.item;
+    public void addAction(ActionString actionString){
+        //Method which puts a String/ActionString pairing into the actionStrings HashMap.
+        this.actionStrings.put(actionString.getIdentity(), actionString);
+    }
+
+    public void removeEnemy(){
+        //Method that removes the Enemy Object contained in the room, by setting the enemy variable to null.
+        //Prints Error message if Room does not contain Enemy Object.
+        if(this.containsEnemy()){
+            this.enemy = null;
+        }
+        else{
+            System.out.println("Room has no Enemy Object.");
+        }
+    }
+    public void removeItem(){
+        //Method that removes the Item Object contained in the room, by setting the item variable to null.
+        //Prints Error message if the Room does not contain Item Object.
+        if(this.containsItem()){
+            this.item = null;
+        }
+        else{
+            System.out.println("Room has no Item Object.");
+        }
+    }
+    public void removeAction(String string){
+        //Method which removes a String/ActionString pairing from the Room object, whose key matches the String argument provided.
+        //Prints Error message if no such String/ActionString pairing is present in the actionStrings HashMap.
+        if(this.actionStrings.containsKey(string)) {
+            this.actionStrings.remove(string);
+        }
+        else{
+            System.out.println("No String/ActionString Pairing found.");
+        }
+    }
+    public String roomDisplay(){
+        //Method that returns a String that is necessary for the output of the game.
+        //String is composed of the description of the room and the available actions in the room.
+        String display = this.description + "\n";
+        display = display + "\n" + "AVAILABLE ACTION:"+"\n";
+        for(String string:actionStrings.keySet()){
+            display = display + this.actionStrings.get(string).actionBar() + "\n";
+        }
+        return display;
+    }
+
+    @Override
+    public String toString(){
+        return "Room: " + this.position.toString();
+    }
+    @Override
+    public boolean equals(Object other){
+        if(this == other){
+            return true;
+        }
+        if(other == null){
+            return false;
+        }
+        if(this.getClass() != other.getClass()){
+            return false;
+        }
+        Room room = (Room) other;
+        return this.enemy.equals(room.getEnemy()) && this.actionStrings.equals(room.getActionStrings()) &&
+               this.position.equals(room.getPosition()) && this.description.equals(room.getDescription()) &&
+               this.item.equals(room.getItem());
+    }
+    @Override
+    public int hashCode(){
+        return Objects.hash(this.enemy, this.actionStrings, this.position, this.description, this.item);
     }
 }

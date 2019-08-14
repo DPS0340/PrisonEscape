@@ -1,54 +1,69 @@
+import java.util.Objects;
 import java.util.Random;
 
-public abstract class  Charachter{
-    //Abstract class for all characters in the game.
-    //Provides general properties each character should have.
-    private String name;
-    private Integer health;
-    private Weapon weapon;
-    private int accuracy;
-    public Charachter(String name,Integer health,Weapon weapon,Integer accuracy){
-        this.name=name;
-        this.health=health;
-        this.weapon=weapon;
-        this.accuracy=accuracy;
+public class  Charachter{
+    /* Class that is meant to function as a template for all the charachters in the game.
+       Provides general properties that every charachter should have.*/
+
+    private final String name; //Name of the charachter.
+    private int health; //Health of the charachter.
+    private Weapon weapon; //Weapon possessed by the charachter.
+    private int accuracy; //Proficiency of the charachter in dealing damage.
+
+    public Charachter(String name, Integer health, Weapon weapon, Integer accuracy){
+        this.name = name;
+        this.health = health;
+        this.weapon = weapon;
+        this.accuracy = accuracy;
     }
-    @Override
-    public String toString(){
-        //toString function.
+
+    //Getter Functions/Accessor Methods.
+    public String getName(){
         return this.name;
     }
-    public void setHealth(Integer h){
-        //Sets character health to a desired value
-        this.health=h;
-    }
     public Integer getHealth(){
-        //Returns the current health of the character.
         return this.health;
     }
-    public void setWeapon(Weapon weapon) {
-        //Sets the weapon of the character.
-        this.weapon = weapon;
-    }
     public Weapon getWeapon(){
-        //Returns the current weapon of the character.
         return this.weapon;
     }
-    public boolean doDamage(Charachter c){
-        //Method that carries an attack by the character.
-        Weapon weapon=this.weapon;
-        Random random=new Random();
-        Integer chance=random.nextInt(10);
-        if(chance<accuracy){
-            weapon.do_damage(c);
+    public int getAccuracy(){
+        return this.accuracy;
+    }
+
+    //Setter Functions/Mutator Methods.
+    public void setHealth(Integer health){
+        this.health = health;
+    }
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
+    }
+    public void setAccuracy(int accuracy){
+        this.accuracy = accuracy;
+    }
+
+    @Override
+    public String toString(){
+        return "Charachter: " + this.getName();
+    }
+    @Override
+    public boolean equals(Object other){
+        if(this == other){
             return true;
         }
-        else{
+        if(other == null){
             return false;
         }
+        if(this.getClass() != other.getClass()){
+            return false;
+        }
+        Charachter charachter = (Charachter) other;
+        return this.name.equals(charachter.getName()) && (this.health == charachter.getHealth()) &&
+               this.weapon.equals(charachter.getWeapon()) && (this.accuracy == charachter.getAccuracy());
     }
-    public Integer scoreValue(){
-        //Returns the score player will get after killing current character.
-        return (this.weapon.getDamage()*2)+(this.accuracy*10)+(this.getHealth());
+    @Override
+    public int hashCode(){
+        return Objects.hash(this.name, this.health, this.weapon, this.accuracy);
     }
+
 }
